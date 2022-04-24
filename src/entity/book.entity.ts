@@ -20,8 +20,12 @@ export class Book {
   title!: string;
 
   @Field(() => Author)
-  @ManyToOne(() => Author, (author) => author.books, {onDelete:'CASCADE'})
+  @ManyToOne(() => Author, (author) => author.books, { onDelete: "CASCADE" })
   author!: Author;
+
+  @Field(() => Boolean)
+  @Column()
+  isOnLoan!: boolean;
 
   @Field()
   @CreateDateColumn({ type: "timestamp" })

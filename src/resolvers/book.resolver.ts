@@ -12,6 +12,7 @@ import { getRepository, Repository } from "typeorm";
 import { Author } from "../entity/author.entity";
 import { Length } from "class-validator";
 import { isAuth } from "../middlewares/auth.middleware";
+import { User } from "../entity/user.entity";
 
 @InputType()
 class BookInput {
@@ -42,14 +43,25 @@ class BookUpdateInput {
   newAuthor?: number;
 }
 
+@InputType()
+class BorrowBookInput {
+  @Field()
+  bookId!: number;
+
+  @Field(() => Number)
+  userId!: number;
+}
+
 @Resolver()
 export class BookResolver {
   bookRepository: Repository<Book>;
   authorRepository: Repository<Author>;
+  userRepository: Repository<User>;
 
   constructor() {
     this.bookRepository = getRepository(Book);
     this.authorRepository = getRepository(Author);
+    this.userRepository = getRepository(User);
   }
 
   @Mutation(() => Book)
@@ -68,6 +80,7 @@ export class BookResolver {
       const book = await this.bookRepository.insert({
         title: input.title,
         author: author,
+        isOnLoan: false,
       });
       return await this.bookRepository.findOne(book.identifiers[0].id, {
         relations: ["author", "author.books"],
@@ -82,6 +95,19 @@ export class BookResolver {
   async getAllBooks(): Promise<Book[]> {
     try {
       return await this.bookRepository.find({
+        relations: ["author", "author.books"],
+      });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Query(() => [Book])
+  @UseMiddleware(isAuth)
+  async getAllAvailibleBooks(): Promise<Book[]> {
+    try {
+      return await this.bookRepository.find({
+        where: { isOnLoan: false },
         relations: ["author", "author.books"],
       });
     } catch (error: any) {
@@ -146,6 +172,37 @@ export class BookResolver {
       if (result.affected === 0) throw new Error("Book does not exist");
 
       return true;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Mutation(() => Book)
+  async borrowBookById(
+    @Arg("input", () => BorrowBookInput) input: BorrowBookInput
+  ): Promise<Book | undefined> {
+    try {
+      const book = await this.bookRepository.findOne(input.bookId);
+
+      if (!book) {
+        throw new Error("Book does not exist");
+      }
+
+      const userExist = await this.userRepository.findOne(input.userId);
+
+      if (!userExist) {
+        throw new Error("User does not exist");
+      }
+
+      if (book.isOnLoan) {
+        throw new Error("Book is allready borrow");
+      }
+      const borrowedBook = await this.bookRepository.save({
+        id: input.bookId,
+        isOnLoan: true,
+      });
+
+      return await this.bookRepository.findOne(borrowedBook.id);
     } catch (error: any) {
       throw new Error(error.message);
     }
