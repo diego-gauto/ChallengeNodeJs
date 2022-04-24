@@ -43,17 +43,21 @@ export class AuthorResolver {
         fullName: input.fullName,
       });
       const result = await this.authorRepository.findOne(
-        createdAuthor.identifiers[0]
+        createdAuthor.identifiers[0].id
       );
       return result;
-    } catch {
-      console.error;
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
   @Query(() => [Author])
   async getAllAuthors(): Promise<Author[]> {
-    return await this.authorRepository.find({ relations: ["books"] });
+    try {
+      return await this.authorRepository.find({ relations: ["books"] });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 
   @Query(() => Author)
@@ -68,8 +72,8 @@ export class AuthorResolver {
         throw error;
       }
       return author;
-    } catch (e) {
-      throw new Error("Something went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
@@ -77,18 +81,22 @@ export class AuthorResolver {
   async updateAuthorById(
     @Arg("input", () => AuthorUpdateInput) input: AuthorUpdateInput
   ): Promise<Author | undefined> {
-    const authorExist = await this.authorRepository.findOne(input.id);
+    try {
+      const authorExist = await this.authorRepository.findOne(input.id);
 
-    if (!authorExist) {
-      throw new Error("Author does not exist");
+      if (!authorExist) {
+        throw new Error("Author does not exist");
+      }
+
+      const updatedAuthor = await this.authorRepository.save({
+        id: input.id,
+        fullName: input.newName,
+      });
+
+      return await this.authorRepository.findOne(updatedAuthor.id);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
-
-    const updatedAuthor = await this.authorRepository.save({
-      id: input.id,
-      fullName: input.newName,
-    });
-
-    return await this.authorRepository.findOne(updatedAuthor.id);
   }
 
   @Mutation(() => Boolean)
@@ -101,10 +109,8 @@ export class AuthorResolver {
 
       await this.authorRepository.delete(input.id);
       return true;
-    } catch {
-      throw new Error("Somethig went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
-    await this.authorRepository.delete(input.id);
-    return true;
   }
 }

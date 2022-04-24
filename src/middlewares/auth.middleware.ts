@@ -20,8 +20,8 @@ export const isAuth: MiddlewareFn<IContex> = ({ context }, next) => {
     const jwt = bearerToken.split(" ")[1];
     const payload = verify(jwt, enviroment.JWT_SECRET);
     context.payload = payload as any;
-  } catch (e) {
-    throw new Error("Something went wrong");
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 
   return next();

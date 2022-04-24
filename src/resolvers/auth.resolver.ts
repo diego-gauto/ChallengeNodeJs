@@ -81,8 +81,8 @@ export class AuthResolver {
       });
 
       return this.userRepository.findOne(newUser.identifiers[0].id);
-    } catch (error) {
-      throw new Error("Something went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
@@ -116,8 +116,8 @@ export class AuthResolver {
         userId: userFound.id,
         jwt: jwt,
       };
-    } catch (error) {
-      throw new Error("Something went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 }

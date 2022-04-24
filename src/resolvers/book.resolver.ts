@@ -70,10 +70,10 @@ export class BookResolver {
         author: author,
       });
       return await this.bookRepository.findOne(book.identifiers[0].id, {
-        relations: ["author", "auhtor.books"],
+        relations: ["author", "author.books"],
       });
-    } catch (e) {
-      throw new Error("Something went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
@@ -84,8 +84,8 @@ export class BookResolver {
       return await this.bookRepository.find({
         relations: ["author", "author.books"],
       });
-    } catch (e) {
-      throw new Error("Something went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 
@@ -112,24 +112,28 @@ export class BookResolver {
   async updateBookById(
     @Arg("input", () => BookUpdateInput) input: BookUpdateInput
   ): Promise<Book | undefined> {
-    const bookExist = await this.bookRepository.findOne(input.id);
+    try {
+      const bookExist = await this.bookRepository.findOne(input.id);
 
-    if (!bookExist) {
-      throw new Error("Book does not exist");
+      if (!bookExist) {
+        throw new Error("Book does not exist");
+      }
+
+      const authorExist = await this.authorRepository.findOne(input.newAuthor);
+
+      if (!authorExist) {
+        throw new Error("Author does not exist");
+      }
+      const updatedBook = await this.bookRepository.save({
+        id: input.id,
+        title: input.newTitle,
+        author: authorExist,
+      });
+
+      return await this.bookRepository.findOne(updatedBook.id);
+    } catch (error: any) {
+      throw new Error(error.message);
     }
-
-    const authorExist = await this.authorRepository.findOne(input.newAuthor);
-
-    if (!authorExist) {
-      throw new Error("Author does not exist");
-    }
-    const updatedBook = await this.bookRepository.save({
-      id: input.id,
-      title: input.newTitle,
-      author: authorExist,
-    });
-
-    return await this.bookRepository.findOne(updatedBook.id);
   }
 
   @Mutation(() => Boolean)
@@ -142,8 +146,8 @@ export class BookResolver {
       if (result.affected === 0) throw new Error("Book does not exist");
 
       return true;
-    } catch (e) {
-      throw new Error("Somethig went wrong");
+    } catch (error: any) {
+      throw new Error(error.message);
     }
   }
 }
