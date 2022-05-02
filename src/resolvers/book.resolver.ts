@@ -77,10 +77,14 @@ export class BookResolver {
           "The author for this book does not existe. Please check it";
         throw error;
       }
+      const now = new Date();
+      console.log(now);
       const book = await this.bookRepository.insert({
         title: input.title,
         author: author,
         isOnLoan: false,
+        //   borrowBookDate: now,
+        //   returnBookDate: now,
       });
       return await this.bookRepository.findOne(book.identifiers[0].id, {
         relations: ["author", "author.books"],
@@ -177,10 +181,10 @@ export class BookResolver {
     }
   }
 
-  @Mutation(() => Book)
-  async borrowBookById(
+  @Mutation(() => Boolean)
+  async borrowBook(
     @Arg("input", () => BorrowBookInput) input: BorrowBookInput
-  ): Promise<Book | undefined> {
+  ): Promise<Boolean | undefined> {
     try {
       const book = await this.bookRepository.findOne(input.bookId);
 
@@ -188,23 +192,85 @@ export class BookResolver {
         throw new Error("Book does not exist");
       }
 
-      const userExist = await this.userRepository.findOne(input.userId);
+      const user = await this.userRepository.findOne(input.userId);
 
-      if (!userExist) {
+      if (!user) {
         throw new Error("User does not exist");
       }
 
       if (book.isOnLoan) {
         throw new Error("Book is allready borrow");
       }
-      const borrowedBook = await this.bookRepository.save({
+
+      if (user.nBooks >= 3) {
+        throw new Error("User can't take off another book");
+      }
+
+      user.nBooks++;
+      await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
+
+      const now = new Date();
+
+      await this.bookRepository.save({
         id: input.bookId,
         isOnLoan: true,
+        user: user,
+        borrowBookDate: now,
+        returnBookDate: addDaysToDate(now, 7),
       });
 
-      return await this.bookRepository.findOne(borrowedBook.id);
+      return true;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
+
+  @Mutation(() => Boolean)
+  async returnBook(
+    @Arg("input", () => BorrowBookInput) input: BorrowBookInput
+  ): Promise<Boolean | undefined> {
+    try {
+      const book = await this.bookRepository.findOne(input.bookId, {
+        relations: ["user"],
+      });
+
+      if (!book) {
+        throw new Error("Book does not exist");
+      }
+
+      const user = await this.userRepository.findOne(input.userId);
+
+      if (!user) {
+        throw new Error("User does not exist");
+      }
+
+      if (!book.isOnLoan) {
+        throw new Error("Book is not borrow");
+      }
+
+      if (user.id !== book.user.id) {
+        throw new Error("User does't have this book");
+      }
+
+      user.nBooks--;
+      await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
+
+      await this.bookRepository.save({
+        id: input.bookId,
+        isOnLoan: false,
+        user: user,
+        borrowBookDate: undefined,
+        returnBookDate: undefined,
+      });
+
+      return true;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+}
+
+function addDaysToDate(date: Date, days: number) {
+  const res = new Date(date.setDate(date.getDate() + days));
+  return res;
 }

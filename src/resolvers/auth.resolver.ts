@@ -6,6 +6,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from "type-graphql";
 import { getRepository, Repository } from "typeorm";
@@ -26,6 +27,12 @@ class userInput {
   @Field()
   @Length(8, 254)
   password!: string;
+}
+
+@InputType()
+class UserDeleteInput {
+  @Field()
+  userId!: number;
 }
 
 @ObjectType()
@@ -78,6 +85,7 @@ export class AuthResolver {
         fullName,
         email,
         password: hashedPassword,
+        nBooks: 0,
       });
 
       return this.userRepository.findOne(newUser.identifiers[0].id);
@@ -116,6 +124,30 @@ export class AuthResolver {
         userId: userFound.id,
         jwt: jwt,
       };
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  async deleteUserById(
+    @Arg("input", () => UserDeleteInput) input: UserDeleteInput
+  ): Promise<Boolean> {
+    try {
+      const user = await this.userRepository.findOne(input.userId);
+      if (!user) throw new Error("User does not exist");
+
+      await this.userRepository.delete(input.userId);
+      return true;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Query(() => [User])
+  async getAllUser(): Promise<User[]> {
+    try {
+      return await this.userRepository.find();
     } catch (error: any) {
       throw new Error(error.message);
     }

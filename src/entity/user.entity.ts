@@ -3,8 +3,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  Any,
+  OneToMany,
 } from "typeorm";
 import { Field, ObjectType } from "type-graphql";
+import { Book } from "./book.entity";
 
 @ObjectType()
 @Entity()
@@ -24,6 +27,14 @@ export class User {
   @Field()
   @Column()
   password!: string;
+
+  @Field()
+  @Column()
+  nBooks!: number;
+
+  @Field(() => [Book], { nullable: true })
+  @OneToMany(() => Book, (book) => book.author, { nullable: true })
+  books!: Book[];
 
   @Field()
   @CreateDateColumn({ type: "timestamp" })
