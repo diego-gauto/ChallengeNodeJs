@@ -25,7 +25,7 @@ export class Book {
   author!: Author;
 
   @Field(() => User, { nullable: true })
-  @ManyToOne(() => User, (user) => user.books)
+  @ManyToOne(() => User, (user) => user.books, { nullable: true })
   user!: User;
 
   @Field(() => Boolean)

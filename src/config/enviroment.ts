@@ -10,4 +10,7 @@ export const enviroment = {
   DB_PASSWORD: process.env.DB_PASSWORD,
   DB_DATABASE: process.env.DB_DATABASE,
   JWT_SECRET: process.env.JWT_SECRET || "Default",
+  CRON_ADMINTIME: process.env.CRON_ADMINTIME,
+  NM_USERNAME: process.env.NM_USERNAME,
+  NM_PASSWORD: process.env.NM_PASSWORD,
 };

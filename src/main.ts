@@ -1,5 +1,6 @@
 import { startServer } from "./server";
 import { connect } from "./config/typeorm";
+import "./cronJobs/admin.cronJob";
 
 async function main() {
   connect();

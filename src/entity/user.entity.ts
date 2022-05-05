@@ -33,7 +33,7 @@ export class User {
   nBooks!: number;
 
   @Field(() => [Book], { nullable: true })
-  @OneToMany(() => Book, (book) => book.author, { nullable: true })
+  @OneToMany(() => Book, (book) => book.user, { nullable: true })
   books!: Book[];
 
   @Field()

@@ -147,7 +147,7 @@ export class AuthResolver {
   @Query(() => [User])
   async getAllUser(): Promise<User[]> {
     try {
-      return await this.userRepository.find();
+      return await this.userRepository.find({ relations: ["books"] });
     } catch (error: any) {
       throw new Error(error.message);
     }

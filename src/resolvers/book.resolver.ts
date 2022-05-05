@@ -13,6 +13,9 @@ import { Author } from "../entity/author.entity";
 import { Length } from "class-validator";
 import { isAuth } from "../middlewares/auth.middleware";
 import { User } from "../entity/user.entity";
+import { transporter } from "../config/mailer";
+import nodemailer from "nodemailer";
+import { enviroment } from "../config/enviroment";
 
 @InputType()
 class BookInput {
@@ -99,7 +102,7 @@ export class BookResolver {
   async getAllBooks(): Promise<Book[]> {
     try {
       return await this.bookRepository.find({
-        relations: ["author", "author.books"],
+        relations: ["author", "author.books", "user"],
       });
     } catch (error: any) {
       throw new Error(error.message);
@@ -112,7 +115,7 @@ export class BookResolver {
     try {
       return await this.bookRepository.find({
         where: { isOnLoan: false },
-        relations: ["author", "author.books"],
+        relations: ["author", "author.books", "user"],
       });
     } catch (error: any) {
       throw new Error(error.message);
@@ -210,13 +213,14 @@ export class BookResolver {
       await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
 
       const now = new Date();
+      const then = new Date();
 
       await this.bookRepository.save({
         id: input.bookId,
         isOnLoan: true,
         user: user,
         borrowBookDate: now,
-        returnBookDate: addDaysToDate(now, 7),
+        returnBookDate: addDaysToDate(then, 7),
       });
 
       return true;
@@ -253,16 +257,22 @@ export class BookResolver {
       }
 
       user.nBooks--;
+
       await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
 
       await this.bookRepository.save({
         id: input.bookId,
         isOnLoan: false,
-        user: user,
+        user: new User(),
         borrowBookDate: undefined,
         returnBookDate: undefined,
       });
-
+      console.log(new User());
+      if (!returnBookOnTime(book.returnBookDate)) {
+        sendEmailToUser("late", user.email);
+      } else {
+        sendEmailToUser("onTime", user.email);
+      }
       return true;
     } catch (error: any) {
       throw new Error(error.message);
@@ -270,7 +280,39 @@ export class BookResolver {
   }
 }
 
-function addDaysToDate(date: Date, days: number) {
+const addDaysToDate = (date: Date, days: number) => {
   const res = new Date(date.setDate(date.getDate() + days));
   return res;
-}
+};
+
+const returnBookOnTime = (date: Date) => {
+  const returnBookDate = date.getTime();
+  const now = new Date().getTime();
+  let res = true;
+
+  if (now - returnBookDate > 0) {
+    res = false;
+  }
+
+  return res;
+};
+
+const sendEmailToUser = async (input: string, userEmail: string) => {
+  let bodyEmail: any = "";
+
+  if (input === "late") {
+    bodyEmail =
+      "You have returned the book late. For that you should pay a fine";
+  } else {
+    bodyEmail = "You have returned the book on time";
+  }
+  console.log(bodyEmail);
+
+  await transporter.sendMail({
+    from: '"Library" <' + enviroment.NM_USERNAME + ">", // sender address
+    to: userEmail, // list of receivers
+    subject: "Library. Book return", // Subject line
+    text: bodyEmail, // plain text body
+    //  html: "<b>Hello world?</b>", // html body
+  });
+};
