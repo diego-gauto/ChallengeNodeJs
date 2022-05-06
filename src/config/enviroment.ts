@@ -13,4 +13,5 @@ export const enviroment = {
   CRON_ADMINTIME: process.env.CRON_ADMINTIME,
   NM_USERNAME: process.env.NM_USERNAME,
   NM_PASSWORD: process.env.NM_PASSWORD,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
 };

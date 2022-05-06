@@ -1,30 +1,11 @@
-import { Arg, Mutation, Resolver, InputType, Field, Query } from "type-graphql";
+import { Arg, Mutation, Resolver, Query } from "type-graphql";
 import { Author } from "../entity/author.entity";
+import {
+  AuthorIdInput,
+  AuthorInput,
+  AuthorUpdateInput,
+} from "../dto/author.dto";
 import { getRepository, Repository } from "typeorm";
-import { Length } from "class-validator";
-
-@InputType()
-class AuthorInput {
-  @Field()
-  @Length(3, 20)
-  fullName!: String;
-}
-
-@InputType()
-class AuthorIdInput {
-  @Field()
-  id!: number;
-}
-
-@InputType()
-class AuthorUpdateInput {
-  @Field()
-  id!: number;
-
-  @Field()
-  @Length(3, 20)
-  newName?: string;
-}
 
 @Resolver()
 export class AuthorResolver {

@@ -1,58 +1,16 @@
 import { compareSync, hash } from "bcryptjs";
-import { IsEmail, Length } from "class-validator";
-import {
-  Arg,
-  Field,
-  InputType,
-  Mutation,
-  ObjectType,
-  Query,
-  Resolver,
-} from "type-graphql";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository, Repository } from "typeorm";
 import { User } from "../entity/user.entity";
 import { enviroment } from "../config/enviroment";
+import { registerUser } from "../servicies/auth/auth.servicies";
 import { sign } from "jsonwebtoken";
-
-@InputType()
-class userInput {
-  @Field()
-  @Length(3, 20)
-  fullName!: string;
-
-  @Field()
-  @IsEmail()
-  email!: string;
-
-  @Field()
-  @Length(8, 254)
-  password!: string;
-}
-
-@InputType()
-class UserDeleteInput {
-  @Field()
-  userId!: number;
-}
-
-@ObjectType()
-class LoginResponse {
-  @Field()
-  userId!: number;
-
-  @Field()
-  jwt!: string;
-}
-
-@InputType()
-class LoginInput {
-  @Field()
-  @IsEmail()
-  email!: string;
-
-  @Field()
-  password!: string;
-}
+import {
+  userInput,
+  LoginInput,
+  LoginResponse,
+  UserDeleteInput,
+} from "../dto/auth.dto";
 
 @Resolver()
 export class AuthResolver {
@@ -66,32 +24,33 @@ export class AuthResolver {
   async register(
     @Arg("input", () => userInput) input: userInput
   ): Promise<User | undefined> {
-    try {
-      const { fullName, email, password } = input;
+    return await registerUser(input, this.userRepository);
+    // try {
+    //   const { fullName, email, password } = input;
 
-      const userExists = await this.userRepository.findOne({
-        where: { email },
-      });
+    //   const userExists = await this.userRepository.findOne({
+    //     where: { email },
+    //   });
 
-      if (userExists) {
-        const error = new Error();
-        error.message = "Email is not available";
-        throw error;
-      }
+    //   if (userExists) {
+    //     const error = new Error();
+    //     error.message = "Email is not available";
+    //     throw error;
+    //   }
 
-      const hashedPassword = await hash(password, 10);
+    //   const hashedPassword = await hash(password, 10);
 
-      const newUser = await this.userRepository.insert({
-        fullName,
-        email,
-        password: hashedPassword,
-        nBooks: 0,
-      });
+    //   const newUser = await this.userRepository.insert({
+    //     fullName,
+    //     email,
+    //     password: hashedPassword,
+    //     nBooks: 0,
+    //   });
 
-      return this.userRepository.findOne(newUser.identifiers[0].id);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
+    //   return this.userRepository.findOne(newUser.identifiers[0].id);
+    // } catch (error: any) {
+    //   throw new Error(error.message);
+    // }
   }
 
   @Mutation(() => LoginResponse)

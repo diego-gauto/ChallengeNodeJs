@@ -1,59 +1,17 @@
-import {
-  Arg,
-  Mutation,
-  Resolver,
-  InputType,
-  Field,
-  Query,
-  UseMiddleware,
-} from "type-graphql";
+import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
 import { Book } from "../entity/book.entity";
 import { getRepository, Repository } from "typeorm";
 import { Author } from "../entity/author.entity";
-import { Length } from "class-validator";
 import { isAuth } from "../middlewares/auth.middleware";
 import { User } from "../entity/user.entity";
 import { transporter } from "../config/mailer";
-import nodemailer from "nodemailer";
 import { enviroment } from "../config/enviroment";
-
-@InputType()
-class BookInput {
-  @Field()
-  @Length(3, 20)
-  title!: string;
-
-  @Field()
-  authorId!: number;
-}
-
-@InputType()
-class BookIdInput {
-  @Field()
-  bookId!: number;
-}
-
-@InputType()
-class BookUpdateInput {
-  @Field()
-  id!: number;
-
-  @Field(() => String, { nullable: true })
-  @Length(3, 20)
-  newTitle?: string;
-
-  @Field(() => Number, { nullable: true })
-  newAuthor?: number;
-}
-
-@InputType()
-class BorrowBookInput {
-  @Field()
-  bookId!: number;
-
-  @Field(() => Number)
-  userId!: number;
-}
+import {
+  BookIdInput,
+  BookInput,
+  BookUpdateInput,
+  BorrowBookInput,
+} from "../dto/book.dto";
 
 @Resolver()
 export class BookResolver {
@@ -285,7 +243,7 @@ const addDaysToDate = (date: Date, days: number) => {
   return res;
 };
 
-const returnBookOnTime = (date: Date) => {
+export const returnBookOnTime = (date: Date) => {
   const returnBookDate = date.getTime();
   const now = new Date().getTime();
   let res = true;
