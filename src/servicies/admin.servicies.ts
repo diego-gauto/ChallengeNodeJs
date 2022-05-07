@@ -1,7 +1,7 @@
-import { enviroment } from "../../config/enviroment";
+import { enviroment } from "../config/enviroment";
 import { Client } from "pg";
-import { returnBookOnTime } from "../../resolvers/book.resolver";
-import { transporter } from "../../config/mailer";
+import { returnBookOnTime } from "./book.servicies";
+import { transporter } from "../config/mailer";
 
 export const sendReportToAdmin = async () => {
   //const client = new Client();

@@ -1,4 +1,4 @@
-import { sendReportToAdmin } from "../servicies/administration/admin.servicies";
+import { sendReportToAdmin } from "../servicies/admin.servicies";
 import events from "events";
 
 export const launchAdminReportEvent = () => {
