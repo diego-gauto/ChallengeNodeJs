@@ -1,11 +1,10 @@
-import { enviroment } from "../config/enviroment";
 import { Client } from "pg";
+import { enviroment } from "../config/enviroment";
 import { returnBookOnTime } from "./book.servicies";
 import { transporter } from "../config/mailer";
 
 export const sendReportToAdmin = async () => {
   //const client = new Client();
-
   const client = new Client({
     host: enviroment.DB_HOST,
     user: enviroment.DB_USERNAME,
@@ -41,13 +40,9 @@ export const sendReportToAdmin = async () => {
   await client.end();
 
   await transporter.sendMail({
-    from: '"Library" <' + enviroment.NM_USERNAME + ">", // sender address
-    to: enviroment.ADMIN_EMAIL, // list of receivers
-    subject: "Library. Book return", // Subject line
-    text: bodyEmail, // plain text body
-    //  html: "<b>Hello world?</b>", // html body
+    from: '"Library" <' + enviroment.NM_USERNAME + ">",
+    to: enviroment.ADMIN_EMAIL,
+    subject: "Library. Book return",
+    text: bodyEmail,
   });
-
-  console.log(bodyEmail);
-  console.log("email sended to Admin");
 };

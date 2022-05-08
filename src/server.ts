@@ -5,6 +5,7 @@ import { buildSchema } from "type-graphql";
 import { BookResolver } from "./resolvers/book.resolver";
 import { AuthorResolver } from "./resolvers/author.resolver";
 import { AuthResolver } from "./resolvers/auth.resolver";
+import { registerCheckBooks, registerAdminReport } from "./events/handler";
 
 export async function startServer() {
   const app = express();
@@ -18,6 +19,9 @@ export async function startServer() {
   await apolloserver.start();
 
   apolloserver.applyMiddleware({ app, path: "/graphql" });
+
+  registerAdminReport();
+  registerCheckBooks();
 
   return app;
 }

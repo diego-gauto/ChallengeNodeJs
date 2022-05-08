@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   ManyToOne,
 } from "typeorm";
-import { Author } from "./author.entity";
 import { Field, ObjectType } from "type-graphql";
+import { Author } from "./author.entity";
 import { User } from "./user.entity";
 
 @ObjectType()
@@ -26,7 +26,7 @@ export class Book {
 
   @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.books, { nullable: true })
-  user!: User;
+  user!: User | null;
 
   @Field(() => Boolean)
   @Column()

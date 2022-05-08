@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   OneToMany,
 } from "typeorm";
-import { Book } from "./book.entity";
 import { Field, ObjectType } from "type-graphql";
+import { Book } from "./book.entity";
 
 @ObjectType()
 @Entity()

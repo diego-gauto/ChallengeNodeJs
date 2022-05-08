@@ -1,6 +1,5 @@
 import { createConnection } from "typeorm";
 import path from "path";
-
 import { enviroment } from "./enviroment";
 
 console.log(enviroment);

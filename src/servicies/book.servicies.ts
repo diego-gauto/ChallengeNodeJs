@@ -1,4 +1,5 @@
 import { Repository } from "typeorm";
+import { Client } from "pg";
 import {
   BookIdInput,
   BookInput,
@@ -196,22 +197,17 @@ export const returnBook = async (
       throw new Error("Book is not borrow");
     }
 
-    if (user.id !== book.user.id) {
+    if (user.id !== book.user?.id) {
       throw new Error("User does't have this book");
     }
 
     user.nBooks--;
-
     await userRepository.save({ id: user.id, nBooks: user.nBooks });
 
-    await bookRepository.save({
-      id: input.bookId,
-      isOnLoan: false,
-      user: new User(),
-      borrowBookDate: undefined,
-      returnBookDate: undefined,
-    });
-    console.log(new User());
+    book.isOnLoan = false;
+    book.user = null;
+    await bookRepository.save(book);
+
     if (!returnBookOnTime(book.returnBookDate)) {
       sendEmailToUser("late", user.email);
     } else {
@@ -249,13 +245,42 @@ const sendEmailToUser = async (input: string, userEmail: string) => {
   } else {
     bodyEmail = "You have returned the book on time";
   }
-  console.log(bodyEmail);
 
   await transporter.sendMail({
-    from: '"Library" <' + enviroment.NM_USERNAME + ">", // sender address
-    to: userEmail, // list of receivers
-    subject: "Library. Book return", // Subject line
-    text: bodyEmail, // plain text body
-    //  html: "<b>Hello world?</b>", // html body
+    from: '"Library" <' + enviroment.NM_USERNAME + ">",
+    to: userEmail,
+    subject: "Library. Book return",
+    text: bodyEmail,
   });
+};
+
+export const sendEmailToUsers = async () => {
+  //const client = new Client();
+  console.log("preparing emails");
+  const client = new Client({
+    host: enviroment.DB_HOST,
+    user: enviroment.DB_USERNAME,
+    password: enviroment.DB_PASSWORD,
+    database: enviroment.DB_DATABASE,
+  });
+  await client.connect();
+
+  const res = await client.query(
+    'SELECT book.id,title,"returnBookDate","user".email FROM book INNER JOIN "user" ON "userId"="user".id where "isOnLoan"=true'
+  );
+  console.log(res.rows);
+  for (let book of res.rows) {
+    let bodyEmail = "";
+    if (!returnBookOnTime(book.returnBookDate)) {
+      bodyEmail += `El libro, ID:${book.id} Title:${book.title} entro en penalizacion. Debera pagar una multa por devolverlo fuera de termino`;
+    }
+
+    await transporter.sendMail({
+      from: '"Library" <' + enviroment.NM_USERNAME + ">",
+      to: book.email,
+      subject: "Library. Book on penalty",
+      text: bodyEmail,
+    });
+  }
+  await client.end();
 };

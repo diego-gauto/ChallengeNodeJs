@@ -1,15 +1,12 @@
-import { sendReportToAdmin } from "../servicies/admin.servicies";
-import events from "events";
+import { AdminEmitter } from "./admin.event-emitter";
 
 export const launchAdminReportEvent = () => {
-  console.log("Administration Report lunched");
-
-  //const events = require("events");
-  const emitter = new events.EventEmitter();
-
-  emitter.on("adminReportEvent", () => {
-    sendReportToAdmin();
-  });
-
+  const emitter = AdminEmitter.getInstance();
   emitter.emit("adminReportEvent");
+};
+
+export const launchCheckBooksEvent = () => {
+  const emitter = AdminEmitter.getInstance();
+  emitter.emit("checkBooksEvent");
+  console.log("checkBooksEvent emitted");
 };

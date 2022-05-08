@@ -1,4 +1,4 @@
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
 import { getRepository, Repository } from "typeorm";
 import { User } from "../entity/user.entity";
 import {
@@ -13,6 +13,7 @@ import {
   LoginResponse,
   UserDeleteInput,
 } from "../dto/auth.dto";
+import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()
 export class AuthResolver {
@@ -35,6 +36,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async deleteUserById(
     @Arg("input", () => UserDeleteInput) input: UserDeleteInput
   ): Promise<Boolean> {
@@ -42,6 +44,7 @@ export class AuthResolver {
   }
 
   @Query(() => [User])
+  @UseMiddleware(isAuth)
   async getAllUsers(): Promise<User[]> {
     return await getAllUsers(this.userRepository);
   }

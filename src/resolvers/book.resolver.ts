@@ -1,8 +1,8 @@
 import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
-import { Book } from "../entity/book.entity";
 import { getRepository, Repository } from "typeorm";
-import { Author } from "../entity/author.entity";
 import { isAuth } from "../middlewares/auth.middleware";
+import { Book } from "../entity/book.entity";
+import { Author } from "../entity/author.entity";
 import { User } from "../entity/user.entity";
 import {
   BookIdInput,
@@ -52,6 +52,7 @@ export class BookResolver {
   }
 
   @Query(() => Book)
+  @UseMiddleware(isAuth)
   async getBookById(
     @Arg("input", () => BookIdInput) input: BookIdInput
   ): Promise<Book | undefined> {
@@ -59,6 +60,7 @@ export class BookResolver {
   }
 
   @Mutation(() => Book)
+  @UseMiddleware(isAuth)
   async updateBookById(
     @Arg("input", () => BookUpdateInput) input: BookUpdateInput
   ): Promise<Book | undefined> {
@@ -66,6 +68,7 @@ export class BookResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async deleteBookById(
     @Arg("input", () => BookIdInput) input: BookIdInput
   ): Promise<Boolean> {
@@ -73,6 +76,7 @@ export class BookResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async borrowBook(
     @Arg("input", () => BorrowBookInput) input: BorrowBookInput
   ): Promise<Boolean | undefined> {
@@ -80,6 +84,7 @@ export class BookResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async returnBook(
     @Arg("input", () => BorrowBookInput) input: BorrowBookInput
   ): Promise<Boolean | undefined> {
