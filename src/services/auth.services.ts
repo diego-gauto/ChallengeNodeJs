@@ -44,7 +44,10 @@ export const userLogin = async (
   try {
     const { email, password } = input;
 
-    const userFound = await userRepository.findOne({ where: { email } });
+    const userFound = await userRepository.findOne({
+      where: { email },
+      relations: ["books", "books.author"],
+    });
 
     if (!userFound) {
       const error = new Error();
@@ -63,7 +66,7 @@ export const userLogin = async (
     const jwt: string = sign({ id: userFound.id }, enviroment.JWT_SECRET);
 
     return {
-      userId: userFound.id,
+      user: userFound,
       jwt: jwt,
     };
   } catch (error: any) {
@@ -89,6 +92,22 @@ export const userDelete = async (
 export const getAllUsers = async (userRepository: Repository<User>) => {
   try {
     return await userRepository.find({ relations: ["books"] });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+export const getUser = async (
+  input: UserDeleteInput,
+  userRepository: Repository<User>
+) => {
+  try {
+    const user = await userRepository.findOne(input.userId, {
+      relations: ["books", "books.author"],
+    });
+    if (!user) throw new Error("User does not exist");
+
+    return user;
   } catch (error: any) {
     throw new Error(error.message);
   }

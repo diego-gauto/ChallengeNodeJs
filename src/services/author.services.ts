@@ -36,7 +36,9 @@ export const getAuthor = async (
   authorRepository: Repository<Author>
 ) => {
   try {
-    const author = await authorRepository.findOne(input.id);
+    const author = await authorRepository.findOne(input.id, {
+      relations: ["books"],
+    });
     if (!author) {
       const error = new Error();
       error.message = "Author does not exist";
@@ -75,8 +77,16 @@ export const delateAuthor = async (
   authorRepository: Repository<Author>
 ) => {
   try {
-    const author = await authorRepository.findOne(input.id);
+    const author = await authorRepository.findOne(input.id, {
+      relations: ["books"],
+    });
     if (!author) throw new Error("Author does not exist");
+    if (
+      author.books.some((book) => {
+        book.isOnLoan === true;
+      })
+    )
+      throw new Error("Author has a borrow book");
 
     await authorRepository.delete(input.id);
     return true;

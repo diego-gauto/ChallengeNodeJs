@@ -12,7 +12,7 @@ import {
   getAllAuthors,
   getAuthor,
   updateAuthor,
-} from "../servicies/author.servicies";
+} from "../services/author.services";
 import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()

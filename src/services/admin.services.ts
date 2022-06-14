@@ -1,6 +1,6 @@
 import { Client } from "pg";
 import { enviroment } from "../config/enviroment";
-import { returnBookOnTime } from "./book.servicies";
+import { returnBookOnTime } from "./book.services";
 import { transporter } from "../config/mailer";
 
 export const sendReportToAdmin = async () => {

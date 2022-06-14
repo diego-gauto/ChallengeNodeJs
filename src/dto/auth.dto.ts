@@ -1,5 +1,6 @@
 import { IsEmail, Length } from "class-validator";
 import { Field, InputType, ObjectType } from "type-graphql";
+import { User } from "../entity/user.entity";
 
 @InputType()
 export class userInput {
@@ -25,7 +26,7 @@ export class UserDeleteInput {
 @ObjectType()
 export class LoginResponse {
   @Field()
-  userId!: number;
+  user!: User;
 
   @Field()
   jwt!: string;

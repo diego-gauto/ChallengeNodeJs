@@ -6,7 +6,8 @@ import {
   userLogin,
   userDelete,
   getAllUsers,
-} from "../servicies/auth.servicies";
+  getUser,
+} from "../services/auth.services";
 import {
   userInput,
   LoginInput,
@@ -47,5 +48,13 @@ export class AuthResolver {
   @UseMiddleware(isAuth)
   async getAllUsers(): Promise<User[]> {
     return await getAllUsers(this.userRepository);
+  }
+
+  @Query(() => User)
+  @UseMiddleware(isAuth)
+  async getUser(
+    @Arg("input", () => UserDeleteInput) input: UserDeleteInput
+  ): Promise<User> {
+    return await getUser(input, this.userRepository);
   }
 }

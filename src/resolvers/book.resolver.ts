@@ -19,7 +19,7 @@ import {
   getBook,
   returnBook,
   updateBook,
-} from "../servicies/book.servicies";
+} from "../services/book.services";
 
 @Resolver()
 export class BookResolver {
@@ -40,7 +40,7 @@ export class BookResolver {
   }
 
   @Query(() => [Book])
-  @UseMiddleware(isAuth)
+  //@UseMiddleware(isAuth)
   async getAllBooks(): Promise<Book[]> {
     return await getAllBooks(this.bookRepository);
   }
