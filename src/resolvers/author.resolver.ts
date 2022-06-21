@@ -8,7 +8,7 @@ import {
 } from "../dto/author.dto";
 import {
   createAuthor,
-  delateAuthor,
+  deleteAuthor,
   getAllAuthors,
   getAuthor,
   updateAuthor,
@@ -58,6 +58,6 @@ export class AuthorResolver {
   async deleteAuthorById(
     @Arg("input", () => AuthorIdInput) input: AuthorIdInput
   ): Promise<Boolean> {
-    return await delateAuthor(input, this.authorRepository);
+    return await deleteAuthor(input, this.authorRepository);
   }
 }

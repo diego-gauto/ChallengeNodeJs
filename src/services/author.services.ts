@@ -72,7 +72,7 @@ export const updateAuthor = async (
   }
 };
 
-export const delateAuthor = async (
+export const deleteAuthor = async (
   input: AuthorIdInput,
   authorRepository: Repository<Author>
 ) => {
@@ -81,11 +81,8 @@ export const delateAuthor = async (
       relations: ["books"],
     });
     if (!author) throw new Error("Author does not exist");
-    if (
-      author.books.some((book) => {
-        book.isOnLoan === true;
-      })
-    )
+
+    if (author.books.some((book) => book.isOnLoan))
       throw new Error("Author has a borrow book");
 
     await authorRepository.delete(input.id);
