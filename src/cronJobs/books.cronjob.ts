@@ -1,8 +1,9 @@
 import { enviroment } from "../config/enviroment";
 import { launchCheckBooksEvent } from "../events/events";
+import logger from "../utils/logger/logger";
 import checkBooksCronJob from "node-cron";
 
 checkBooksCronJob.schedule(enviroment.CRON_CHECKBOOKS, () => {
-  console.log("checkBookEvent launched");
+  logger.info("checkBookEvent launched");
   launchCheckBooksEvent();
 });

@@ -1,8 +1,7 @@
 import { createConnection } from "typeorm";
 import path from "path";
 import { enviroment } from "./enviroment";
-
-console.log(enviroment);
+import logger from "../utils/logger/logger";
 
 export async function connect() {
   await createConnection({
@@ -14,5 +13,5 @@ export async function connect() {
     entities: [path.join(__dirname, "../entity/**/**.ts")],
     synchronize: true,
   });
-  console.log("database running");
+  logger.info("Database runnig");
 }
