@@ -8,6 +8,7 @@ async function main() {
   connect();
   const port: number = Number(process.env.PORT);
   const app = await startServer();
+
   app.listen(port, () => logger.info(`App running on port: ${port}`));
 }
 

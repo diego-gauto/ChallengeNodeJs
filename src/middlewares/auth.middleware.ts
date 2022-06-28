@@ -2,6 +2,7 @@ import { MiddlewareFn } from "type-graphql";
 import { verify } from "jsonwebtoken";
 import { Response, Request } from "express";
 import { enviroment } from "../config/enviroment";
+import { CustomError } from "../errors/custom.error";
 
 export interface IContex {
   req: Request;
@@ -14,14 +15,14 @@ export const isAuth: MiddlewareFn<IContex> = ({ context }, next) => {
     const bearerToken = context.req.headers["authorization"];
 
     if (!bearerToken) {
-      throw new Error("Unauthorized");
+      throw new CustomError("Author is not authorized", "UNAUTHORIZED");
     }
 
     const jwt = bearerToken.split(" ")[1];
     const payload = verify(jwt, enviroment.JWT_SECRET);
     context.payload = payload as any;
   } catch (error: any) {
-    throw new Error(error.message);
+    throw error;
   }
 
   return next();

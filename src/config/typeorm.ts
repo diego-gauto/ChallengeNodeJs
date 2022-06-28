@@ -13,5 +13,5 @@ export async function connect() {
     entities: [path.join(__dirname, "../entity/**/**.ts")],
     synchronize: true,
   });
-  logger.info("Database runnig");
+  logger.info("Database running");
 }
