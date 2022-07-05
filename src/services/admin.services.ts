@@ -1,6 +1,5 @@
 import { Client } from "pg";
 import { enviroment } from "../config/enviroment";
-import { returnBookOnTime } from "./book.services";
 import { transporter } from "../config/mailer";
 
 export const sendReportToAdmin = async () => {
@@ -45,4 +44,16 @@ export const sendReportToAdmin = async () => {
     subject: "Library. Book return",
     text: bodyEmail,
   });
+};
+
+const returnBookOnTime = (date: Date) => {
+  const returnBookDate = date.getTime();
+  const now = new Date().getTime();
+  let res = true;
+
+  if (now - returnBookDate > 0) {
+    res = false;
+  }
+
+  return res;
 };

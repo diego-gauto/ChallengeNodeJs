@@ -15,7 +15,7 @@ export const isAuth: MiddlewareFn<IContex> = ({ context }, next) => {
     const bearerToken = context.req.headers["authorization"];
 
     if (!bearerToken) {
-      throw new CustomError("Author is not authorized", "UNAUTHORIZED");
+      throw new CustomError("User is not authorized", "UNAUTHORIZED");
     }
 
     const jwt = bearerToken.split(" ")[1];

@@ -1,26 +1,19 @@
 import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
-import { getRepository, Repository } from "typeorm";
 import { Author } from "../entity/author.entity";
 import {
   AuthorIdInput,
   AuthorInput,
   AuthorUpdateInput,
 } from "../dto/author.dto";
-import {
-  createAuthor,
-  deleteAuthor,
-  getAllAuthors,
-  getAuthor,
-  updateAuthor,
-} from "../services/author.services";
+import AuthorServices from "../services/author.services";
 import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()
 export class AuthorResolver {
-  authorRepository: Repository<Author>;
+  private authorServices: AuthorServices;
 
   constructor() {
-    this.authorRepository = getRepository(Author);
+    this.authorServices = new AuthorServices();
   }
 
   @Mutation(() => Author)
@@ -28,13 +21,13 @@ export class AuthorResolver {
   async createAuthor(
     @Arg("input", () => AuthorInput) input: AuthorInput
   ): Promise<Author | undefined> {
-    return await createAuthor(input, this.authorRepository);
+    return await this.authorServices.createAuthor(input);
   }
 
   @Query(() => [Author])
   @UseMiddleware(isAuth)
   async getAllAuthors(): Promise<Author[]> {
-    return await getAllAuthors(this.authorRepository);
+    return await this.authorServices.getAllAuthors();
   }
 
   @Query(() => Author)
@@ -42,7 +35,7 @@ export class AuthorResolver {
   async getAuthorById(
     @Arg("input", () => AuthorIdInput) input: AuthorIdInput
   ): Promise<Author | undefined> {
-    return await getAuthor(input, this.authorRepository);
+    return await this.authorServices.getAuthor(input);
   }
 
   @Mutation(() => Author)
@@ -50,7 +43,7 @@ export class AuthorResolver {
   async updateAuthorById(
     @Arg("input", () => AuthorUpdateInput) input: AuthorUpdateInput
   ): Promise<Author | undefined> {
-    return await updateAuthor(input, this.authorRepository);
+    return await this.authorServices.updateAuthor(input);
   }
 
   @Mutation(() => Boolean)
@@ -58,6 +51,6 @@ export class AuthorResolver {
   async deleteAuthorById(
     @Arg("input", () => AuthorIdInput) input: AuthorIdInput
   ): Promise<Boolean> {
-    return await deleteAuthor(input, this.authorRepository);
+    return await this.authorServices.deleteAuthor(input);
   }
 }

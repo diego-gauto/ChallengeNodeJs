@@ -1,93 +1,67 @@
-import { Repository } from "typeorm";
-import { UserInputError } from "apollo-server-express";
+import { getRepository, Repository } from "typeorm";
 import {
   AuthorIdInput,
   AuthorInput,
   AuthorUpdateInput,
 } from "../dto/author.dto";
 import { Author } from "../entity/author.entity";
-import logger from "../utils/logger/logger";
 import { CustomError } from "../errors/custom.error";
 
-export const createAuthor = async (
-  input: AuthorInput,
-  authorRepository: Repository<Author>
-) => {
-  //  try {
-  const createdAuthor = await authorRepository.insert({
-    fullName: input.fullName,
-  });
-  const result = await authorRepository.findOne(
-    createdAuthor.identifiers[0].id
-  );
-  return result;
-  // } catch (error: any) {
-  //   throw (error);
-  // }
-};
+export default class AuthorServices {
+  private authorRepository: Repository<Author>;
 
-export const getAllAuthors = async (authorRepository: Repository<Author>) => {
-  //  try {
-  return await authorRepository.find({ relations: ["books"] });
-  // } catch (error: any) {
-  //   throw (error);
-  // }
-};
+  constructor() {
+    this.authorRepository = getRepository(Author);
+  }
 
-export const getAuthor = async (
-  input: AuthorIdInput,
-  authorRepository: Repository<Author>
-) => {
-  //  try {
-  const author = await authorRepository.findOne(input.id, {
-    relations: ["books"],
-  });
-  if (!author) throw new CustomError("Author does not exist", "BAD_USER_INPUT");
-  return author;
-  // } catch (error: any) {
-  //   throw new Error(error.message);
-  // }
-};
+  createAuthor = async (input: AuthorInput) => {
+    const createdAuthor = await this.authorRepository.insert({
+      fullName: input.fullName,
+    });
+    const result = await this.authorRepository.findOne(
+      createdAuthor.identifiers[0].id
+    );
+    return result;
+  };
 
-export const updateAuthor = async (
-  input: AuthorUpdateInput,
-  authorRepository: Repository<Author>
-) => {
-  //  try {
-  const authorExist = await authorRepository.findOne(input.id);
+  getAllAuthors = async () => {
+    return await this.authorRepository.find({ relations: ["books"] });
+  };
 
-  if (!authorExist)
-    throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+  getAuthor = async (input: AuthorIdInput) => {
+    const author = await this.authorRepository.findOne(input.id, {
+      relations: ["books"],
+    });
+    if (!author)
+      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    return author;
+  };
 
-  const updatedAuthor = await authorRepository.save({
-    id: input.id,
-    fullName: input.newName,
-  });
+  updateAuthor = async (input: AuthorUpdateInput) => {
+    const authorExist = await this.authorRepository.findOne(input.id);
 
-  return await authorRepository.findOne(updatedAuthor.id);
-  // } catch (error: any) {
-  //   throw new Error(error.message);
-  // }
-};
+    if (!authorExist)
+      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
 
-export const deleteAuthor = async (
-  input: AuthorIdInput,
-  authorRepository: Repository<Author>
-) => {
-  // try {
-  const author = await authorRepository.findOne(input.id, {
-    relations: ["books"],
-  });
-  if (!author) throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    const updatedAuthor = await this.authorRepository.save({
+      id: input.id,
+      fullName: input.newName,
+    });
 
-  if (author.books.some((book) => book.isOnLoan))
-    throw new CustomError("Author has a borrow book", "BAD_USER_INPUT");
+    return await this.authorRepository.findOne(updatedAuthor.id);
+  };
 
-  await authorRepository.delete(input.id);
-  return true;
+  deleteAuthor = async (input: AuthorIdInput) => {
+    const author = await this.authorRepository.findOne(input.id, {
+      relations: ["books"],
+    });
+    if (!author)
+      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
 
-  // } catch (error: any) {
-  //   logger.error(error.message);
-  //   throw new CustomError(error.message, 400);
-  //}
-};
+    if (author.books.some((book) => book.isOnLoan))
+      throw new CustomError("Author has a borrow book", "BAD_USER_INPUT");
+
+    await this.authorRepository.delete(input.id);
+    return true;
+  };
+}

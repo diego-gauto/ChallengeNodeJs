@@ -1,13 +1,6 @@
 import { Arg, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
-import { getRepository, Repository } from "typeorm";
 import { User } from "../entity/user.entity";
-import {
-  userRegister,
-  userLogin,
-  userDelete,
-  getAllUsers,
-  getUser,
-} from "../services/auth.services";
+import UserServices from "../services/auth.services";
 import {
   userInput,
   LoginInput,
@@ -18,22 +11,22 @@ import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()
 export class AuthResolver {
-  userRepository: Repository<User>;
+  private userServices: UserServices;
 
   constructor() {
-    this.userRepository = getRepository(User);
+    this.userServices = new UserServices();
   }
 
   @Mutation(() => User)
   async register(
     @Arg("input", () => userInput) input: userInput
   ): Promise<User | undefined> {
-    return await userRegister(input, this.userRepository);
+    return await this.userServices.userRegister(input);
   }
 
   @Mutation(() => LoginResponse)
   async login(@Arg("input", () => LoginInput) input: LoginInput) {
-    return await userLogin(input, this.userRepository);
+    return await this.userServices.userLogin(input);
   }
 
   @Mutation(() => Boolean)
@@ -41,13 +34,13 @@ export class AuthResolver {
   async deleteUserById(
     @Arg("input", () => UserDeleteInput) input: UserDeleteInput
   ): Promise<Boolean> {
-    return await userDelete(input, this.userRepository);
+    return await this.userServices.userDelete(input);
   }
 
   @Query(() => [User])
   @UseMiddleware(isAuth)
   async getAllUsers(): Promise<User[]> {
-    return await getAllUsers(this.userRepository);
+    return await this.userServices.getAllUsers();
   }
 
   @Query(() => User)
@@ -55,6 +48,6 @@ export class AuthResolver {
   async getUser(
     @Arg("input", () => UserDeleteInput) input: UserDeleteInput
   ): Promise<User> {
-    return await getUser(input, this.userRepository);
+    return await this.userServices.getUser(input);
   }
 }

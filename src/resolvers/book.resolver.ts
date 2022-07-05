@@ -1,54 +1,38 @@
 import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
-import { getRepository, Repository } from "typeorm";
 import { isAuth } from "../middlewares/auth.middleware";
 import { Book } from "../entity/book.entity";
-import { Author } from "../entity/author.entity";
-import { User } from "../entity/user.entity";
 import {
   BookIdInput,
   BookInput,
   BookUpdateInput,
   BorrowBookInput,
 } from "../dto/book.dto";
-import {
-  borrowBook,
-  createBook,
-  deleteBook,
-  getAllAvailibleBooks,
-  getAllBooks,
-  getBook,
-  returnBook,
-  updateBook,
-} from "../services/book.services";
+import BookServices from "../services/book.services";
 
 @Resolver()
 export class BookResolver {
-  bookRepository: Repository<Book>;
-  authorRepository: Repository<Author>;
-  userRepository: Repository<User>;
+  private bookServices: BookServices;
 
   constructor() {
-    this.bookRepository = getRepository(Book);
-    this.authorRepository = getRepository(Author);
-    this.userRepository = getRepository(User);
+    this.bookServices = new BookServices();
   }
 
   @Mutation(() => Book)
   @UseMiddleware(isAuth)
   async createBook(@Arg("input", () => BookInput) input: BookInput) {
-    return await createBook(input, this.authorRepository, this.bookRepository);
+    return await this.bookServices.createBook(input);
   }
 
   @Query(() => [Book])
   //@UseMiddleware(isAuth)
   async getAllBooks(): Promise<Book[]> {
-    return await getAllBooks(this.bookRepository);
+    return await this.bookServices.getAllBooks();
   }
 
   @Query(() => [Book])
   @UseMiddleware(isAuth)
   async getAllAvailibleBooks(): Promise<Book[]> {
-    return await getAllAvailibleBooks(this.bookRepository);
+    return await this.bookServices.getAllAvailibleBooks();
   }
 
   @Query(() => Book)
@@ -56,7 +40,7 @@ export class BookResolver {
   async getBookById(
     @Arg("input", () => BookIdInput) input: BookIdInput
   ): Promise<Book | undefined> {
-    return await getBook(input, this.bookRepository);
+    return await this.bookServices.getBook(input);
   }
 
   @Mutation(() => Book)
@@ -64,7 +48,7 @@ export class BookResolver {
   async updateBookById(
     @Arg("input", () => BookUpdateInput) input: BookUpdateInput
   ): Promise<Book | undefined> {
-    return await updateBook(input, this.bookRepository, this.authorRepository);
+    return await this.bookServices.updateBook(input);
   }
 
   @Mutation(() => Boolean)
@@ -72,7 +56,7 @@ export class BookResolver {
   async deleteBookById(
     @Arg("input", () => BookIdInput) input: BookIdInput
   ): Promise<Boolean> {
-    return await deleteBook(input, this.bookRepository);
+    return await this.bookServices.deleteBook(input);
   }
 
   @Mutation(() => Boolean)
@@ -80,7 +64,7 @@ export class BookResolver {
   async borrowBook(
     @Arg("input", () => BorrowBookInput) input: BorrowBookInput
   ): Promise<Boolean | undefined> {
-    return await borrowBook(input, this.bookRepository, this.userRepository);
+    return await this.bookServices.borrowBook(input);
   }
 
   @Mutation(() => Boolean)
@@ -88,6 +72,6 @@ export class BookResolver {
   async returnBook(
     @Arg("input", () => BorrowBookInput) input: BorrowBookInput
   ): Promise<Boolean | undefined> {
-    return await returnBook(input, this.bookRepository, this.userRepository);
+    return await this.bookServices.returnBook(input);
   }
 }
