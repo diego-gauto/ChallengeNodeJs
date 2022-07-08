@@ -24,7 +24,7 @@ export class BookResolver {
   }
 
   @Query(() => [Book])
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async getAllBooks(): Promise<Book[]> {
     return await this.bookServices.getAllBooks();
   }

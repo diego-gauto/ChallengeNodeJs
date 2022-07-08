@@ -1,59 +1,73 @@
-import { Client } from "pg";
+import { getRepository } from "typeorm";
 import { enviroment } from "../config/enviroment";
 import { transporter } from "../config/mailer";
+import { Book } from "../entity/book.entity";
+import logger from "../utils/logger/logger";
+import { returnBookOnTime } from "./utils/utils";
 
 export const sendReportToAdmin = async () => {
-  //const client = new Client();
-  const client = new Client({
-    host: enviroment.DB_HOST,
-    user: enviroment.DB_USERNAME,
-    password: enviroment.DB_PASSWORD,
-    database: enviroment.DB_DATABASE,
-  });
-
   let bodyEmail = `Los libros que estan disponibles son:\n`;
 
-  await client.connect();
-  let res = await client.query('SELECT * FROM book WHERE "isOnLoan"=false');
+  const availableBooks = await getRepository(Book)
+    .createQueryBuilder("book")
+    .select(["book.id", "book.title"])
+    .where("book.isOnLoan = :value", { value: false })
+    .getMany();
 
-  for (let book of res.rows) {
+  for (let book of availableBooks) {
     bodyEmail += `ID:${book.id} Title:${book.title}\n`;
   }
 
-  res = await client.query('SELECT * FROM book WHERE "isOnLoan"=true');
-  bodyEmail += `\nLos libros que estan prestados, a tiempo de devolverlos son:\n`;
+  const borrowBooks = await getRepository(Book)
+    .createQueryBuilder("book")
+    .select(["book.id", "book.title", "book.returnBookDate"])
+    .where("book.isOnLoan = :value", { value: true })
+    .getMany();
 
-  for (let book of res.rows) {
+  let bodyEmailBooksOnTime = `\nLos libros que estan prestados, a tiempo de devolverlos son:\n`;
+  let bodyEmailBooksOnPenalization = `\nLos libros que estan prestados en penalizacion son:\n`;
+
+  for (let book of borrowBooks) {
     if (returnBookOnTime(book.returnBookDate)) {
-      bodyEmail += `ID:${book.id} Title:${book.title}\n`;
+      bodyEmailBooksOnTime += `ID:${book.id} Title:${book.title}\n`;
+    } else {
+      bodyEmailBooksOnPenalization += `ID:${book.id} Title:${book.title}\n`;
     }
   }
 
-  bodyEmail += `\nLos libros que estan prestados en penalizacion son:\n`;
-
-  for (let book of res.rows) {
-    if (!returnBookOnTime(book.returnBookDate)) {
-      bodyEmail += `ID:${book.id} Title:${book.title}\n`;
-    }
-  }
-  await client.end();
+  bodyEmail += bodyEmailBooksOnTime + bodyEmailBooksOnPenalization;
 
   await transporter.sendMail({
     from: '"Library" <' + enviroment.NM_USERNAME + ">",
     to: enviroment.ADMIN_EMAIL,
-    subject: "Library. Book return",
+    subject: "Library. Books report",
     text: bodyEmail,
   });
+  logger.info("Report sent to Administration");
 };
 
-const returnBookOnTime = (date: Date) => {
-  const returnBookDate = date.getTime();
-  const now = new Date().getTime();
-  let res = true;
+export const sendEmailToUsers = async () => {
+  const borrowBooks = await getRepository(Book)
+    .createQueryBuilder("book")
+    .select(["book.id", "book.title", "book.returnBookDate", "user.email"])
+    .leftJoinAndSelect("book.user", "user")
+    .where("book.isOnLoan = :value", { value: true })
+    .getMany();
 
-  if (now - returnBookDate > 0) {
-    res = false;
+  logger.info(borrowBooks);
+
+  for (let book of borrowBooks) {
+    let bodyEmail = "";
+    if (!returnBookOnTime(book.returnBookDate)) {
+      bodyEmail += `El libro, ID:${book.id} Title:${book.title} entro en penalizacion. Debera pagar una multa por devolverlo fuera de termino`;
+    }
+
+    await transporter.sendMail({
+      from: '"Library" <' + enviroment.NM_USERNAME + ">",
+      to: book.user?.email,
+      subject: "Library. Book on penalty",
+      text: bodyEmail,
+    });
   }
-
-  return res;
+  logger.info("E-mails sent to users");
 };

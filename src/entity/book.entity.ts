@@ -34,7 +34,7 @@ export class Book {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  borrowBookDate!: Date;
+  borrowBookDate?: Date;
 
   @Field({ nullable: true })
   @Column({ nullable: true })

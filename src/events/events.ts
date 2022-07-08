@@ -8,5 +8,4 @@ export const launchAdminReportEvent = () => {
 export const launchCheckBooksEvent = () => {
   const emitter = AdminEmitter.getInstance();
   emitter.emit("checkBooksEvent");
-  console.log("checkBooksEvent emitted");
 };

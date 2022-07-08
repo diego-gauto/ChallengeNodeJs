@@ -1,5 +1,4 @@
-import { getRepository, Repository } from "typeorm";
-import { Client } from "pg";
+import { getRepository, Repository, getConnection } from "typeorm";
 import {
   BookIdInput,
   BookInput,
@@ -12,6 +11,7 @@ import { User } from "../entity/user.entity";
 import { enviroment } from "../config/enviroment";
 import { transporter } from "../config/mailer";
 import { CustomError } from "../errors/custom.error";
+import { addDaysToDate, returnBookOnTime } from "./utils/utils";
 
 export default class BookServices {
   private authorRepository: Repository<Author>;
@@ -101,38 +101,53 @@ export default class BookServices {
     const book = await this.bookRepository.findOne(input.bookId);
 
     if (!book) {
-      throw new Error("Book does not exist");
+      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
     }
 
     const user = await this.userRepository.findOne(input.userId);
 
     if (!user) {
-      throw new Error("User does not exist");
+      throw new CustomError("User does not exist", "BAD_USER_INPUT");
     }
 
     if (book.isOnLoan) {
-      throw new Error("Book is allready borrow");
+      throw new CustomError("Book is allready borrow", "BAD_USER_INPUT");
     }
 
     if (user.nBooks >= 3) {
-      throw new Error("User can't take off another book");
+      throw new CustomError(
+        "User can't take off another book",
+        "BAD_USER_INPUT"
+      );
     }
 
-    user.nBooks++;
-    await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
 
-    const now = new Date();
-    const then = new Date();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      user.nBooks++;
+      await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
 
-    await this.bookRepository.save({
-      id: input.bookId,
-      isOnLoan: true,
-      user: user,
-      borrowBookDate: now,
-      returnBookDate: this.addDaysToDate(then, 7),
-    });
+      const now = new Date();
+      const then = new Date();
 
-    return true;
+      await this.bookRepository.save({
+        id: input.bookId,
+        isOnLoan: true,
+        user: user,
+        borrowBookDate: now,
+        returnBookDate: addDaysToDate(then, 7),
+      });
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   };
 
   returnBook = async (input: BorrowBookInput) => {
@@ -141,59 +156,52 @@ export default class BookServices {
     });
 
     if (!book) {
-      throw new Error("Book does not exist");
+      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
     }
 
     const user = await this.userRepository.findOne(input.userId);
 
     if (!user) {
-      throw new Error("User does not exist");
+      throw new CustomError("User does not exist", "BAD_USER_INPUT");
     }
 
     if (!book.isOnLoan) {
-      throw new Error("Book is not borrow");
+      throw new CustomError("Book is not borrow", "BAD_USER_INPUT");
     }
 
     if (user.id !== book.user?.id) {
-      throw new Error("User does't have this book");
+      throw new CustomError("User does't have this book", "BAD_USER_INPUT");
     }
 
-    user.nBooks--;
-    await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
 
-    book.isOnLoan = false;
-    book.user = null;
-    await this.bookRepository.save(book);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!this.returnBookOnTime(book.returnBookDate)) {
-      this.sendEmailToUser("late", user.email);
-    } else {
-      this.sendEmailToUser("onTime", user.email);
+    try {
+      user.nBooks--;
+      await this.userRepository.save({ id: user.id, nBooks: user.nBooks });
+
+      book.isOnLoan = false;
+      book.user = null;
+      book.borrowBookDate = undefined;
+      await this.bookRepository.save(book);
+
+      this.sendEmailToUser(book.returnBookDate, user.email);
+      return true;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-    return true;
   };
 
-  private addDaysToDate = (date: Date, days: number) => {
-    const res = new Date(date.setDate(date.getDate() + days));
-    return res;
-  };
+  private sendEmailToUser = async (returnBookDate: Date, userEmail: string) => {
+    let bodyEmail: string = "";
 
-  public returnBookOnTime = (date: Date) => {
-    const returnBookDate = date.getTime();
-    const now = new Date().getTime();
-    let res = true;
-
-    if (now - returnBookDate > 0) {
-      res = false;
-    }
-
-    return res;
-  };
-
-  private sendEmailToUser = async (input: string, userEmail: string) => {
-    let bodyEmail: any = "";
-
-    if (input === "late") {
+    if (returnBookOnTime(returnBookDate)) {
       bodyEmail =
         "You have returned the book late. For that you should pay a fine";
     } else {
@@ -206,36 +214,5 @@ export default class BookServices {
       subject: "Library. Book return",
       text: bodyEmail,
     });
-  };
-
-  private sendEmailToUsers = async () => {
-    //const client = new Client();
-    console.log("preparing emails");
-    const client = new Client({
-      host: enviroment.DB_HOST,
-      user: enviroment.DB_USERNAME,
-      password: enviroment.DB_PASSWORD,
-      database: enviroment.DB_DATABASE,
-    });
-    await client.connect();
-
-    const res = await client.query(
-      'SELECT book.id,title,"returnBookDate","user".email FROM book INNER JOIN "user" ON "userId"="user".id where "isOnLoan"=true'
-    );
-    console.log(res.rows);
-    for (let book of res.rows) {
-      let bodyEmail = "";
-      if (!this.returnBookOnTime(book.returnBookDate)) {
-        bodyEmail += `El libro, ID:${book.id} Title:${book.title} entro en penalizacion. Debera pagar una multa por devolverlo fuera de termino`;
-      }
-
-      await transporter.sendMail({
-        from: '"Library" <' + enviroment.NM_USERNAME + ">",
-        to: book.email,
-        subject: "Library. Book on penalty",
-        text: bodyEmail,
-      });
-    }
-    await client.end();
   };
 }
