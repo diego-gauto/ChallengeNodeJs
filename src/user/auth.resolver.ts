@@ -1,12 +1,12 @@
 import { Arg, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
-import { User } from "../entity/user.entity";
-import UserServices from "../services/auth.services";
+import { User } from "./user.entity";
+import UserServices from "./auth.services";
 import {
   userInput,
   LoginInput,
   LoginResponse,
   UserDeleteInput,
-} from "../dto/auth.dto";
+} from "./auth.dto";
 import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()

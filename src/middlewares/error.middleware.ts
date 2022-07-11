@@ -1,6 +1,6 @@
 import { MiddlewareFn } from "type-graphql";
 import { CustomError } from "../errors/custom.error";
-import logger from "../utils/logger/logger";
+import logger from "../utils/logger";
 
 export const ErrorInterceptor: MiddlewareFn<any> = async (
   { context, info },

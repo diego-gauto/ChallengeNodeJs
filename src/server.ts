@@ -2,11 +2,14 @@ import express from "express";
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
-import { BookResolver } from "./resolvers/book.resolver";
-import { AuthorResolver } from "./resolvers/author.resolver";
-import { AuthResolver } from "./resolvers/auth.resolver";
+import { BookResolver } from "./book/book.resolver";
+import { AuthorResolver } from "./author/author.resolver";
+import { AuthResolver } from "./user/auth.resolver";
 import { registerCheckBooks, registerAdminReport } from "./events/handler";
 import { ErrorInterceptor } from "./middlewares/error.middleware";
+import { Server } from "http";
+import logger from "./utils/logger";
+import { closeDBConnection } from "./config/typeorm";
 
 export async function startServer() {
   const app = express();
@@ -31,3 +34,11 @@ export async function startServer() {
 
   return app;
 }
+
+export const shutdown = (server: Server, exitCode: number) => {
+  if (exitCode === 1) logger.error("Ungracefully stopping process");
+  if (exitCode === 0) logger.error("Gracefully stopping process");
+  closeDBConnection();
+  server.close();
+  setTimeout(process.exit(exitCode), 500);
+};

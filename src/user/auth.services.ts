@@ -1,8 +1,8 @@
 import { getRepository, Repository } from "typeorm";
 import { hash, compareSync } from "bcryptjs";
 import { sign } from "jsonwebtoken";
-import { LoginInput, UserDeleteInput, userInput } from "../dto/auth.dto";
-import { User } from "../entity/user.entity";
+import { LoginInput, UserDeleteInput, userInput } from "./auth.dto";
+import { User } from "./user.entity";
 import { enviroment } from "../config/enviroment";
 import { CustomError } from "../errors/custom.error";
 

@@ -1,13 +1,13 @@
 import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
 import { isAuth } from "../middlewares/auth.middleware";
-import { Book } from "../entity/book.entity";
+import { Book } from "./book.entity";
 import {
   BookIdInput,
   BookInput,
   BookUpdateInput,
   BorrowBookInput,
-} from "../dto/book.dto";
-import BookServices from "../services/book.services";
+} from "./book.dto";
+import BookServices from "./book.services";
 
 @Resolver()
 export class BookResolver {

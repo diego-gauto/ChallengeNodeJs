@@ -1,12 +1,7 @@
 import { Arg, Mutation, Resolver, Query, UseMiddleware } from "type-graphql";
-import { Middlewares} from 'graphql-composer-decorators'
-import { Author } from "../entity/author.entity";
-import {
-  AuthorIdInput,
-  AuthorInput,
-  AuthorUpdateInput,
-} from "../dto/author.dto";
-import AuthorServices from "../services/author.services";
+import { Author } from "./author.entity";
+import { AuthorIdInput, AuthorInput, AuthorUpdateInput } from "./author.dto";
+import AuthorServices from "./author.services";
 import { isAuth } from "../middlewares/auth.middleware";
 
 @Resolver()
@@ -18,7 +13,7 @@ export class AuthorResolver {
   }
 
   @Mutation(() => Author)
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async createAuthor(
     @Arg("input", () => AuthorInput) input: AuthorInput
   ): Promise<Author | undefined> {
@@ -26,13 +21,13 @@ export class AuthorResolver {
   }
 
   @Query(() => [Author])
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async getAllAuthors(): Promise<Author[]> {
     return await this.authorServices.getAllAuthors();
   }
 
   @Query(() => Author)
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async getAuthorById(
     @Arg("input", () => AuthorIdInput) input: AuthorIdInput
   ): Promise<Author | undefined> {
@@ -40,7 +35,7 @@ export class AuthorResolver {
   }
 
   @Mutation(() => Author)
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async updateAuthorById(
     @Arg("input", () => AuthorUpdateInput) input: AuthorUpdateInput
   ): Promise<Author | undefined> {
@@ -48,7 +43,7 @@ export class AuthorResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseMiddleware(isAuth)
+  @UseMiddleware(isAuth)
   async deleteAuthorById(
     @Arg("input", () => AuthorIdInput) input: AuthorIdInput
   ): Promise<Boolean> {

@@ -1,4 +1,4 @@
-import { MiddlewareFn, NextFn } from "type-graphql";
+import { MiddlewareFn } from "type-graphql";
 import { verify } from "jsonwebtoken";
 import { Response, Request } from "express";
 import { enviroment } from "../config/enviroment";
@@ -27,4 +27,3 @@ export const isAuth: MiddlewareFn<IContex> = ({ context }, next) => {
 
   return next();
 };
-

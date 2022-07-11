@@ -6,36 +6,24 @@ import {
   OneToMany,
 } from "typeorm";
 import { Field, ObjectType } from "type-graphql";
-import { Book } from "./book.entity";
+import { Book } from "../book/book.entity";
 
 @ObjectType()
 @Entity()
-export class User {
+export class Author {
   @Field()
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field()
+  @Field(() => String)
   @Column()
-  fullName!: string;
-
-  @Field()
-  @Column()
-  email!: string;
-
-  @Field()
-  @Column()
-  password!: string;
-
-  @Field()
-  @Column()
-  nBooks!: number;
+  fullName!: String;
 
   @Field(() => [Book], { nullable: true })
-  @OneToMany(() => Book, (book) => book.user, { nullable: true })
+  @OneToMany(() => Book, (book) => book.author, { nullable: true })
   books!: Book[];
 
-  @Field()
+  @Field(() => String)
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: string;
 }

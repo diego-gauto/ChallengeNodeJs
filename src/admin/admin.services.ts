@@ -1,9 +1,9 @@
 import { getRepository } from "typeorm";
 import { enviroment } from "../config/enviroment";
 import { transporter } from "../config/mailer";
-import { Book } from "../entity/book.entity";
-import logger from "../utils/logger/logger";
-import { returnBookOnTime } from "./utils/utils";
+import { Book } from "../book/book.entity";
+import logger from "../utils/logger";
+import { returnBookOnTime } from "../utils/utils";
 
 export const sendReportToAdmin = async () => {
   let bodyEmail = `Los libros que estan disponibles son:\n`;

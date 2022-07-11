@@ -1,7 +1,7 @@
-import { createConnection } from "typeorm";
+import { Connection, createConnection, getConnection } from "typeorm";
 import path from "path";
 import { enviroment } from "./enviroment";
-import logger from "../utils/logger/logger";
+import logger from "../utils/logger";
 
 export async function connect() {
   await createConnection({
@@ -14,4 +14,16 @@ export async function connect() {
     synchronize: true,
   });
   logger.info("Database running");
+}
+
+export async function closeDBConnection() {
+  const connection: Connection = getConnection();
+
+  try {
+    await connection.close();
+    logger.info("connection to the database could be closed");
+  } catch (error) {
+    logger.error("connection to the database could not be closed");
+    throw error;
+  }
 }

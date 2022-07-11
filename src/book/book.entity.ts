@@ -6,8 +6,8 @@ import {
   ManyToOne,
 } from "typeorm";
 import { Field, ObjectType } from "type-graphql";
-import { Author } from "./author.entity";
-import { User } from "./user.entity";
+import { Author } from "../author/author.entity";
+import { User } from "../user/user.entity";
 
 @ObjectType()
 @Entity()

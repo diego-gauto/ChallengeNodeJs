@@ -1,10 +1,6 @@
 import { getRepository, Repository } from "typeorm";
-import {
-  AuthorIdInput,
-  AuthorInput,
-  AuthorUpdateInput,
-} from "../dto/author.dto";
-import { Author } from "../entity/author.entity";
+import { AuthorIdInput, AuthorInput, AuthorUpdateInput } from "./author.dto";
+import { Author } from "./author.entity";
 import { CustomError } from "../errors/custom.error";
 
 export default class AuthorServices {

@@ -1,6 +1,6 @@
 import { AdminEmitter } from "./admin.event-emitter";
-import { sendReportToAdmin } from "../services/admin.services";
-import { sendEmailToUsers } from "../services/admin.services";
+import { sendReportToAdmin } from "../admin/admin.services";
+import { sendEmailToUsers } from "../admin/admin.services";
 
 export const registerAdminReport = () => {
   const emitter = AdminEmitter.getInstance();

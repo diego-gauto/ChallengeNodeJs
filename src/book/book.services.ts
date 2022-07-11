@@ -4,14 +4,14 @@ import {
   BookInput,
   BookUpdateInput,
   BorrowBookInput,
-} from "../dto/book.dto";
-import { Author } from "../entity/author.entity";
-import { Book } from "../entity/book.entity";
-import { User } from "../entity/user.entity";
+} from "./book.dto";
+import { Author } from "../author/author.entity";
+import { Book } from "./book.entity";
+import { User } from "../user/user.entity";
 import { enviroment } from "../config/enviroment";
 import { transporter } from "../config/mailer";
 import { CustomError } from "../errors/custom.error";
-import { addDaysToDate, returnBookOnTime } from "./utils/utils";
+import { addDaysToDate, returnBookOnTime } from "../utils/utils";
 
 export default class BookServices {
   private authorRepository: Repository<Author>;
