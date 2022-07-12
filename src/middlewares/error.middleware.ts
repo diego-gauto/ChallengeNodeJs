@@ -1,6 +1,6 @@
 import { MiddlewareFn } from "type-graphql";
+import { CriticalError } from "../errors/critical.error";
 import { CustomError } from "../errors/custom.error";
-import logger from "../utils/logger";
 
 export const ErrorInterceptor: MiddlewareFn<any> = async (
   { context, info },
@@ -9,14 +9,9 @@ export const ErrorInterceptor: MiddlewareFn<any> = async (
   try {
     return await next();
   } catch (err: any) {
-    logger.info(err);
-    logger.info(err instanceof CustomError);
     if (!(err instanceof CustomError)) {
-      logger.fatal("Critical error");
-      throw new CustomError("Houston, We have a problem...", "CRITICAL_ERROR");
+      throw new CriticalError();
     }
-
-    logger.error(err.message);
     throw err;
   }
 };

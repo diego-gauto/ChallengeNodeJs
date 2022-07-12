@@ -5,6 +5,9 @@ import { LoginInput, UserDeleteInput, userInput } from "./auth.dto";
 import { User } from "./user.entity";
 import { enviroment } from "../config/enviroment";
 import { CustomError } from "../errors/custom.error";
+import { UserExistsError } from "../errors/userExists.error";
+import { UnauthenticatedError } from "../errors/unauthenticated.error";
+import { NotUserError } from "../errors/notUser.error";
 
 export default class UserService {
   private userRepository: Repository<User>;
@@ -21,7 +24,7 @@ export default class UserService {
     });
 
     if (userExists) {
-      throw new CustomError("User is already exist", "BAD_USER_INPUT");
+      throw new UserExistsError();
     }
 
     const hashedPassword = await hash(password, 10);
@@ -45,13 +48,13 @@ export default class UserService {
     });
 
     if (!userFound) {
-      throw new CustomError("Invalid Credential", "BAD_USER_INPUT");
+      throw new UnauthenticatedError();
     }
 
     const isValidPassword: boolean = compareSync(password, userFound.password);
 
     if (!isValidPassword) {
-      throw new CustomError("Invalid Credential", "BAD_USER_INPUT");
+      throw new UnauthenticatedError();
     }
 
     const jwt: string = sign({ id: userFound.id }, enviroment.JWT_SECRET);
@@ -65,7 +68,7 @@ export default class UserService {
   userDelete = async (input: UserDeleteInput) => {
     const user = await this.userRepository.findOne(input.userId);
 
-    if (!user) throw new CustomError("User doesn't exist", "BAD_USER_INPUT");
+    if (!user) throw new NotUserError();
 
     await this.userRepository.delete(input.userId);
 
@@ -80,7 +83,7 @@ export default class UserService {
     const user = await this.userRepository.findOne(input.userId, {
       relations: ["books", "books.author"],
     });
-    if (!user) throw new CustomError("User doesn't exist", "BAD_USER_INPUT");
+    if (!user) throw new NotUserError();
 
     return user;
   };

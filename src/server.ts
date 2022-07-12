@@ -11,6 +11,7 @@ import { Server } from "http";
 import logger from "./utils/logger";
 import { closeDBConnection } from "./config/typeorm";
 import { ValidateInput } from "./middlewares/validation.middleware";
+import { getConnection } from "typeorm";
 
 export async function startServer() {
   const app = express();
@@ -36,10 +37,13 @@ export async function startServer() {
   return app;
 }
 
-export const shutdown = (server: Server, exitCode: number) => {
+export const shutdown = async (server: Server, exitCode: number) => {
   if (exitCode === 1) logger.error("Ungracefully stopping process");
   if (exitCode === 0) logger.error("Gracefully stopping process");
-  closeDBConnection();
-  server.close();
-  setTimeout(process.exit(exitCode), 500);
+  await closeDBConnection();
+  server.close(() => {
+    logger.info("HTTP server closed");
+  });
+
+  setTimeout(process.exit(exitCode), 1000);
 };

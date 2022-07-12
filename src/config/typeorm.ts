@@ -16,14 +16,15 @@ export async function connect() {
   logger.info("Database running");
 }
 
-export async function closeDBConnection() {
-  const connection: Connection = getConnection();
-
+export const closeDBConnection = async () => {
   try {
+    logger.info("Preparing to close DB connection");
+    const connection: Connection = getConnection();
+    logger.info("Get connection");
     await connection.close();
     logger.info("connection to the database could be closed");
   } catch (error) {
     logger.error("connection to the database could not be closed");
     throw error;
   }
-}
+};

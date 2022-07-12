@@ -12,6 +12,13 @@ import { enviroment } from "../config/enviroment";
 import { transporter } from "../config/mailer";
 import { CustomError } from "../errors/custom.error";
 import { addDaysToDate, returnBookOnTime } from "../utils/utils";
+import { NotAuthorError } from "../errors/notAuthor.error";
+import { NotBookError } from "../errors/notBook.error";
+import { NotUserError } from "../errors/notUser.error";
+import { BorrowBookError } from "../errors/borrowBook.error";
+import { UserBorrowBookError } from "../errors/userBorrowBook.error";
+import { NotBorrowBookError } from "../errors/notBorrowBook.error";
+import { NotUserBookError } from "../errors/notUserBook.error";
 
 export default class BookServices {
   private authorRepository: Repository<Author>;
@@ -28,11 +35,7 @@ export default class BookServices {
     const author: Author | undefined = await this.authorRepository.findOne(
       input.authorId
     );
-    if (!author)
-      throw new CustomError(
-        "The author for this book does not exist. Please check it",
-        "BAD_USER_INPUT"
-      );
+    if (!author) throw new NotAuthorError();
 
     const book = await this.bookRepository.insert({
       title: input.title,
@@ -63,7 +66,7 @@ export default class BookServices {
       relations: ["author", "author.books"],
     });
 
-    if (!book) throw new CustomError("Book does not exist", "BAD_USER_INPUT");
+    if (!book) throw new NotBookError();
 
     return book;
   };
@@ -71,13 +74,11 @@ export default class BookServices {
   updateBook = async (input: BookUpdateInput) => {
     const bookExist = await this.bookRepository.findOne(input.id);
 
-    if (!bookExist)
-      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
+    if (!bookExist) throw new NotBookError();
 
     const authorExist = await this.authorRepository.findOne(input.newAuthor);
 
-    if (!authorExist)
-      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    if (!authorExist) throw new NotAuthorError();
 
     const updatedBook = await this.bookRepository.save({
       id: input.id,
@@ -91,8 +92,7 @@ export default class BookServices {
   deleteBook = async (input: BookIdInput) => {
     const result = await this.bookRepository.delete(input.bookId);
 
-    if (result.affected === 0)
-      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
+    if (result.affected === 0) throw new NotBookError();
 
     return true;
   };
@@ -101,24 +101,21 @@ export default class BookServices {
     const book = await this.bookRepository.findOne(input.bookId);
 
     if (!book) {
-      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
+      throw new NotBookError();
     }
 
     const user = await this.userRepository.findOne(input.userId);
 
     if (!user) {
-      throw new CustomError("User does not exist", "BAD_USER_INPUT");
+      throw new NotUserError();
     }
 
     if (book.isOnLoan) {
-      throw new CustomError("Book is allready borrow", "BAD_USER_INPUT");
+      throw new BorrowBookError();
     }
 
     if (user.nBooks >= 3) {
-      throw new CustomError(
-        "User can't take off another book",
-        "BAD_USER_INPUT"
-      );
+      throw new UserBorrowBookError();
     }
 
     const connection = getConnection();
@@ -156,21 +153,21 @@ export default class BookServices {
     });
 
     if (!book) {
-      throw new CustomError("Book does not exist", "BAD_USER_INPUT");
+      throw new NotBookError();
     }
 
     const user = await this.userRepository.findOne(input.userId);
 
     if (!user) {
-      throw new CustomError("User does not exist", "BAD_USER_INPUT");
+      throw new NotUserError();
     }
 
     if (!book.isOnLoan) {
-      throw new CustomError("Book is not borrow", "BAD_USER_INPUT");
+      throw new NotBorrowBookError();
     }
 
     if (user.id !== book.user?.id) {
-      throw new CustomError("User does't have this book", "BAD_USER_INPUT");
+      throw new NotUserBookError();
     }
 
     const connection = getConnection();

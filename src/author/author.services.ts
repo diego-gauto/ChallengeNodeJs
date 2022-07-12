@@ -2,6 +2,8 @@ import { getRepository, Repository } from "typeorm";
 import { AuthorIdInput, AuthorInput, AuthorUpdateInput } from "./author.dto";
 import { Author } from "./author.entity";
 import { CustomError } from "../errors/custom.error";
+import { NotAuthorError } from "../errors/notAuthor.error";
+import { DeleteAuthorError } from "../errors/deleteAuthor.error";
 
 export default class AuthorServices {
   private authorRepository: Repository<Author>;
@@ -28,16 +30,14 @@ export default class AuthorServices {
     const author = await this.authorRepository.findOne(input.id, {
       relations: ["books"],
     });
-    if (!author)
-      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    if (!author) throw new NotAuthorError();
     return author;
   };
 
   updateAuthor = async (input: AuthorUpdateInput) => {
     const authorExist = await this.authorRepository.findOne(input.id);
 
-    if (!authorExist)
-      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    if (!authorExist) throw new NotAuthorError();
 
     const updatedAuthor = await this.authorRepository.save({
       id: input.id,
@@ -51,11 +51,10 @@ export default class AuthorServices {
     const author = await this.authorRepository.findOne(input.id, {
       relations: ["books"],
     });
-    if (!author)
-      throw new CustomError("Author does not exist", "BAD_USER_INPUT");
+    if (!author) throw new NotAuthorError();
 
     if (author.books.some((book) => book.isOnLoan))
-      throw new CustomError("Author has a borrow book", "BAD_USER_INPUT");
+      throw new DeleteAuthorError();
 
     await this.authorRepository.delete(input.id);
     return true;

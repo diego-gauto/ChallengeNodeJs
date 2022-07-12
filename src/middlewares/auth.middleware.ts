@@ -3,6 +3,7 @@ import { verify } from "jsonwebtoken";
 import { Response, Request } from "express";
 import { enviroment } from "../config/enviroment";
 import { CustomError } from "../errors/custom.error";
+import { UnauthorizedError } from "../errors/unauthorized.error";
 
 export interface IContex {
   req: Request;
@@ -15,7 +16,7 @@ export const isAuth: MiddlewareFn<IContex> = ({ context }, next) => {
     const bearerToken = context.req.headers["authorization"];
 
     if (!bearerToken) {
-      throw new CustomError("User is not authorized", "UNAUTHORIZED");
+      throw new UnauthorizedError();
     }
 
     const jwt = bearerToken.split(" ")[1];
