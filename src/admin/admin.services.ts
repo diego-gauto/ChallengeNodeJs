@@ -54,8 +54,6 @@ export const sendEmailToUsers = async () => {
     .where("book.isOnLoan = :value", { value: true })
     .getMany();
 
-  logger.info(borrowBooks);
-
   for (let book of borrowBooks) {
     let bodyEmail = "";
     if (!returnBookOnTime(book.returnBookDate)) {

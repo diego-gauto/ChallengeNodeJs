@@ -10,6 +10,7 @@ import { ErrorInterceptor } from "./middlewares/error.middleware";
 import { Server } from "http";
 import logger from "./utils/logger";
 import { closeDBConnection } from "./config/typeorm";
+import { ValidateInput } from "./middlewares/validation.middleware";
 
 export async function startServer() {
   const app = express();
@@ -17,7 +18,7 @@ export async function startServer() {
   const apolloserver = new ApolloServer({
     schema: await buildSchema({
       resolvers: [BookResolver, AuthorResolver, AuthResolver],
-      globalMiddlewares: [ErrorInterceptor],
+      globalMiddlewares: [ErrorInterceptor, ValidateInput],
     }),
     context: ({ req, res }) => ({ req, res }),
     formatError: (err) => {

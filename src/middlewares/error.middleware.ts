@@ -9,6 +9,8 @@ export const ErrorInterceptor: MiddlewareFn<any> = async (
   try {
     return await next();
   } catch (err: any) {
+    logger.info(err);
+    logger.info(err instanceof CustomError);
     if (!(err instanceof CustomError)) {
       logger.fatal("Critical error");
       throw new CustomError("Houston, We have a problem...", "CRITICAL_ERROR");
