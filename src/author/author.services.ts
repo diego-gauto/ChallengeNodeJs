@@ -28,7 +28,7 @@ export default class AuthorServices {
 
   getAuthor = async (input: AuthorIdInput) => {
     const author = await this.authorRepository.findOne(input.id, {
-      relations: ["books"],
+      relations: ["books", "books.author"],
     });
     if (!author) throw new NotAuthorError();
     return author;
