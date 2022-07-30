@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start:dev": "npx nodemon src/main.ts --exec ts-node"
+    "start:dev": "npx nodemon src/main.ts --exec ts-node",
+    "start": "node main.ts"
   },
   "keywords": [],
   "author": "",
