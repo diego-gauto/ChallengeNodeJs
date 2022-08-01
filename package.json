@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start:dev": "npx nodemon src/main.ts --exec ts-node",
-    "start:web": "cross-env NODE_ENV=production PROCESS_TYPE=web NEW_RELIC_LABELS=role:web NEW_RELIC_APP_NAME=th-api ts-node --transpile-only ./src/main"
+    "start": "cross-env NODE_ENV=production PROCESS_TYPE=web NEW_RELIC_LABELS=role:web NEW_RELIC_APP_NAME=th-api ts-node --transpile-only ./src/main"
   },
   "keywords": [],
   "author": "",
