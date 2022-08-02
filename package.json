@@ -2,7 +2,7 @@
   "name": "node.js",
   "version": "1.0.0",
   "description": "",
-  "main": "main.ts",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "start:dev": "npx nodemon src/main.ts --exec ts-node",
