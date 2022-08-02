@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start:dev": "npx nodemon src/main.ts --exec ts-node",
-    "start": "ts-node --transpile-only src/main.ts",
+    "start": "node --loader ts-node/esm src/main.ts",
     "postinstall": "tsc"
   },
   "keywords": [],
