@@ -2,7 +2,6 @@
   "name": "node.js",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "server.js",
   "scripts": {
     "start:dev": "npx nodemon src/main.ts --exec ts-node",
@@ -29,9 +28,9 @@
     "pg": "^8.7.3",
     "pino": "^8.0.0",
     "reflect-metadata": "^0.1.13",
+    "ts-node": "^10.4.0",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.2.38",
-    "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
