@@ -9,9 +9,7 @@ import { registerCheckBooks, registerAdminReport } from "./events/handler";
 import { ErrorInterceptor } from "./middlewares/error.middleware";
 import { Server } from "http";
 import logger from "./utils/logger";
-import { closeDBConnection } from "./config/typeorm";
 import { ValidateInput } from "./middlewares/validation.middleware";
-import { getConnection } from "typeorm";
 
 export async function startServer() {
   const app = express();
@@ -40,7 +38,7 @@ export async function startServer() {
 export const shutdown = async (server: Server, exitCode: number) => {
   if (exitCode === 1) logger.error("Ungracefully stopping process");
   if (exitCode === 0) logger.error("Gracefully stopping process");
-  await closeDBConnection();
+  // await closeDBConnection();
   server.close(() => {
     logger.info("HTTP server closed");
   });

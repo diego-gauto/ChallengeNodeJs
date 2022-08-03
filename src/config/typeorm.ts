@@ -11,6 +11,10 @@ export async function connect() {
     password: enviroment.DB_PASSWORD,
     database: enviroment.DB_DATABASE,
     entities: [path.join(__dirname, "../*/*.entity.ts")],
+    host: enviroment.DB_HOST,
+    ssl: {
+      rejectUnauthorized: false, // Only if not NODE_ENV=production
+    },
     synchronize: true,
   });
   logger.info("Database running");
@@ -21,7 +25,7 @@ export const closeDBConnection = async () => {
     logger.info("Preparing to close DB connection");
     const connection: Connection = getConnection();
     logger.info("Get connection");
-    await connection.close();
+    await connection.close(); // TODO: Only close if its opened
     logger.info("connection to the database could be closed");
   } catch (error) {
     logger.error("connection to the database could not be closed");

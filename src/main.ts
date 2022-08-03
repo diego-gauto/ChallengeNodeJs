@@ -6,7 +6,7 @@ import "./cronJobs/books.cronjob";
 import { Server } from "http";
 
 async function main() {
-  connect();
+  await connect();
   const port: number = Number(process.env.PORT);
   const app = await startServer();
 
@@ -17,12 +17,15 @@ async function main() {
   process.on("uncaughtException", () => {
     shutdown(server, 1);
   });
+
   process.on("unhandledRejection", () => {
     shutdown(server, 1);
   });
+  
   process.on("SIGTERM", () => {
     shutdown(server, 0);
   });
+  
   process.on("SIGINT", () => {
     shutdown(server, 0);
   });
