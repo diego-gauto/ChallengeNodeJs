@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "type": "module",
   "scripts": {
     "start:dev": "npx nodemon src/main.ts --exec ts-node",
-    "start": "ts-node --transpile-only src/main.ts"
+    "start": "ts-node src/main.ts"
   },
   "keywords": [],
   "author": "",
@@ -42,8 +41,5 @@
     "@types/pg": "^8.6.5",
     "nodemon": "^2.0.14",
     "pino-pretty": "^8.0.0"
-  },
-  "engines": {
-    "node": "16.13.1"
   }
 }
