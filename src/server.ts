@@ -20,9 +20,9 @@ export async function startServer() {
       globalMiddlewares: [ErrorInterceptor, ValidateInput],
     }),
     context: ({ req, res }) => ({ req, res }),
-    formatError: (err) => {
-      return { message: err.message, statusCode: err.extensions.code };
-    },
+    // formatError: (err) => {
+    //   return { message: err.message, statusCode: err.extensions.code };
+    //},
   });
 
   await apolloserver.start();
