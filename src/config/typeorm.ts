@@ -12,9 +12,9 @@ export async function connect() {
     database: enviroment.DB_DATABASE,
     entities: [path.join(__dirname, "../*/*.entity.ts")],
     host: enviroment.DB_HOST,
-    // ssl: {
-    //   rejectUnauthorized: false, // Only if not NODE_ENV=production
-    // ,
+    ssl: {
+      rejectUnauthorized: false, // Only if not NODE_ENV=production
+    },
     synchronize: true,
   });
   logger.info("Database running");
