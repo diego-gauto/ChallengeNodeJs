@@ -4,8 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "build": "tsc",
     "dev": "cross-env NODE_ENV=development nodemon src/main.ts --exec ts-node",
-    "prod": "cross-env NODE_ENV=production ts-node src/main.ts"
+    "prod": "cross-env NODE_ENV=production ts-node src/main.ts",
+    "start": "node dist/main.js"
   },
   "keywords": [],
   "author": "",
