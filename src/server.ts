@@ -25,6 +25,12 @@ export async function startServer() {
     // formatError: (err) => {
     //   return { message: err.message, statusCode: err.extensions.code };
     //},
+    cache: "bounded",
+    //deshabilitar graphql playground en producción
+    introspection: true,
+    plugins: [
+      require("apollo-server-core").ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
   await apolloserver.start();
