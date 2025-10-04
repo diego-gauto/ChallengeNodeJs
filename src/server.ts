@@ -28,13 +28,15 @@ export async function startServer() {
     cache: "bounded",
     //deshabilitar graphql playground en producción
     introspection: true,
-    plugins: [
-      require("apollo-server-core").ApolloServerPluginLandingPageGraphQLPlayground(),
-    ],
   });
 
   await apolloserver.start();
-  apolloserver.applyMiddleware({ app: app as any, path: "/graphql" });
+  apolloserver.applyMiddleware({
+    app: app as any,
+    path: "/graphql",
+    // Habilitar CORS y playground a nivel de middleware
+    cors: true,
+  });
 
   registerAdminReport();
   registerCheckBooks();
