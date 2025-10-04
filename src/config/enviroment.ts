@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
 
-// Selecciona el archivo .env según NODE_ENV
-const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env.development";
-dotenv.config({ path: envFile });
+// Solo cargar archivos .env en desarrollo local
+if (process.env.NODE_ENV !== "production") {
+  const envFile = ".env.development";
+  dotenv.config({ path: envFile });
+}
 
 export const enviroment = {
   PORT: process.env.PORT,

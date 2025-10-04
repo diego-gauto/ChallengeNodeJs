@@ -12,11 +12,8 @@ export async function connect() {
     database: enviroment.DB_DATABASE,
     entities: [path.join(__dirname, "../*/*.entity.ts")],
     host: enviroment.DB_HOST,
-    // Configuración condicional según entorno
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: true }
-        : false,
+    // Cambiar a true en producción
+    ssl: false,
     synchronize: process.env.NODE_ENV !== "production",
   });
   logger.info("Database running");
