@@ -35,7 +35,6 @@ export async function startServer() {
     app: app as any,
     path: "/graphql",
     // Habilitar CORS y playground a nivel de middleware
-    cors: true,
   });
 
   registerAdminReport();
