@@ -14,20 +14,21 @@ import { ValidateInput } from "./middlewares/validation.middleware";
 export async function startServer() {
   const app = express();
 
+  const schema = await buildSchema({
+    resolvers: [BookResolver, AuthorResolver, AuthResolver],
+    globalMiddlewares: [ErrorInterceptor, ValidateInput],
+  });
+
   const apolloserver = new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [BookResolver, AuthorResolver, AuthResolver],
-      globalMiddlewares: [ErrorInterceptor, ValidateInput],
-    }),
-    context: ({ req, res }) => ({ req, res }),
+    schema,
+    context: (ctx: any) => ({ req: ctx.req, res: ctx.res }),
     // formatError: (err) => {
     //   return { message: err.message, statusCode: err.extensions.code };
     //},
   });
 
   await apolloserver.start();
-
-  apolloserver.applyMiddleware({ app, path: "/graphql" });
+  apolloserver.applyMiddleware({ app: app as any, path: "/graphql" });
 
   registerAdminReport();
   registerCheckBooks();
