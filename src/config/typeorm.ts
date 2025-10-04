@@ -10,7 +10,7 @@ export async function connect() {
     username: enviroment.DB_USERNAME,
     password: enviroment.DB_PASSWORD,
     database: enviroment.DB_DATABASE,
-    entities: [path.join(__dirname, "../*/*.entity.ts")],
+    entities: [path.join(__dirname, "../*/*.entity.{ts,js}")],
     host: enviroment.DB_HOST,
     // Cambiar a true en producción
     ssl: false,
