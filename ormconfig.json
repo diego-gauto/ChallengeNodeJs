@@ -1,13 +1,14 @@
 {
   "type": "postgres",
-  "host": "localhost",
+  "host": "dpg-d3gjlcp5pdvs73eithj0-a.oregon-postgres.render.com",
   "port": 5432,
-  "username": "postgres",
-  "password": "v06n06c09",
-  "database": "virtual_library_dev",
-  "entities": ["src/**/*.entity.{ts,js}"],
-  "migrations": ["migrations/*.{ts,js}"],
+  "username": "vurtuallibraryuser",
+  "password": "Mt920TU2RfoyRDjW5LJa9JigIZp3iGmE",
+  "database": "virtual_library_prod",
+  "entities": ["dist/**/*.entity.js"],
+  "migrations": ["dist/migrations/*.js"],
   "cli": {
     "migrationsDir": "migrations"
-  }
+  },
+  "ssl": true
 }
