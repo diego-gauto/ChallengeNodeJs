@@ -15,6 +15,10 @@ export async function connect() {
     // Cambiar a true en producción
     ssl: false,
     synchronize: process.env.NODE_ENV !== "production",
+    migrations: [path.join(__dirname, "../../migrations/*.{ts,js}")], // Ruta a los archivos de migración
+    cli: {
+      migrationsDir: "migrations", // Carpeta donde se guardarán las migraciones generadas
+    },
   });
   logger.info("Database running");
 }

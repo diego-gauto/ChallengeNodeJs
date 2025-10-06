@@ -7,7 +7,11 @@
     "build": "tsc",
     "dev": "cross-env NODE_ENV=development nodemon src/main.ts --exec ts-node",
     "prod": "cross-env NODE_ENV=production ts-node src/main.ts",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "migration:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -d src/config/typeorm.ts ./migrations/auto-migration",
+    "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run -d src/config/typeorm.ts",
+    "migration:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert -d src/config/typeorm.ts",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js"
   },
   "keywords": [],
   "author": "",
@@ -37,8 +41,8 @@
     "pino-pretty": "^8.1.0",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^1.1.1",
-    "typeorm": "^0.2.38",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "typeorm": "^0.2.38"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

@@ -1,0 +1,13 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "v06n06c09",
+  "database": "virtual_library_dev",
+  "entities": ["src/**/*.entity.{ts,js}"],
+  "migrations": ["migrations/*.{ts,js}"],
+  "cli": {
+    "migrationsDir": "migrations"
+  }
+}
