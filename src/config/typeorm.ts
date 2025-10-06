@@ -12,16 +12,9 @@ export async function connect() {
     database: enviroment.DB_DATABASE,
     entities: [path.join(__dirname, "../*/*.entity.{ts,js}")],
     host: enviroment.DB_HOST,
-    // Use SSL in production environments (many cloud Postgres require it)
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : false,
+    // SSL disabled by default (original pre-migrations state)
+    ssl: false,
     synchronize: process.env.NODE_ENV !== "production",
-    migrations: [path.join(__dirname, "../../migrations/*.{ts,js}")], // Ruta a los archivos de migración
-    cli: {
-      migrationsDir: "migrations", // Carpeta donde se guardarán las migraciones generadas
-    },
   });
   logger.info("Database running");
 }
