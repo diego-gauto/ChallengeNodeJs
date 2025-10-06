@@ -3,5 +3,10 @@
 .env.development
 .env.production
 
+# Archivos de desarrollo y build
 node_modules
 dist/
+
+# Configuración de base de datos y migraciones
+ormconfig.json
+migrations/

@@ -12,8 +12,11 @@ export async function connect() {
     database: enviroment.DB_DATABASE,
     entities: [path.join(__dirname, "../*/*.entity.{ts,js}")],
     host: enviroment.DB_HOST,
-    // SSL disabled by default (original pre-migrations state)
-    ssl: false,
+    // SSL enabled for production (Render requires it)
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
     synchronize: process.env.NODE_ENV !== "production",
   });
   logger.info("Database running");
